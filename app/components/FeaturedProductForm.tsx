@@ -10,13 +10,14 @@ import React, {
 } from "react";
 import * as Yup from "yup";
 import { uploadImage } from "../utils/helper";
-import { createFeaturedProduct, updateFeaturedProduct } from "../(admin)/products/featured/action";
+import {
+  createFeaturedProduct,
+  updateFeaturedProduct,
+} from "../(admin)/products/featured/action";
 import { toast } from "react-toastify";
 import { FeaturedProductForUpdate } from "../types";
 import { removeImageFromCloud } from "../(admin)/products/action";
 import { useRouter } from "next/navigation";
-
-
 
 export interface FeaturedProduct {
   file?: File;
@@ -78,7 +79,7 @@ export default function FeaturedProductForm({ initialValue }: Props) {
   const [isForUpdate, setIsForUpdate] = useState(false);
   const [featuredProduct, setFeaturedProduct] =
     useState<FeaturedProduct>(defaultProduct);
-    const router = useRouter()
+  const router = useRouter();
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = ({ target }) => {
     const { name, value, files } = target;
@@ -91,65 +92,59 @@ export default function FeaturedProductForm({ initialValue }: Props) {
 
   const handleCreate = async () => {
     try {
-       const { link, linkTitle, title, file } = 
+      const { link, linkTitle, title, file } =
         await newFeaturedProductValidationSchema.validate(
-            {...featuredProduct}, 
-            { abortEarly: false });
+          { ...featuredProduct },
+          { abortEarly: false }
+        );
       if (featuredProduct.file != undefined) {
         const banner = await uploadImage(featuredProduct.file);
-        console.log({ banner });
         await createFeaturedProduct({ banner, link, linkTitle, title });
         router.refresh();
-        setFeaturedProduct({...defaultProduct});
-        
+        setFeaturedProduct({ ...defaultProduct });
       }
     } catch (error) {
-        if(error instanceof Yup.ValidationError) {
-            error.inner.map((err) => {
-                toast.error(err.message)
-            })
-        }
+      if (error instanceof Yup.ValidationError) {
+        error.inner.map((err) => {
+          toast.error(err.message);
+        });
+      }
     }
   };
 
   const handleUpdate = async () => {
     try {
-        const { link, linkTitle, title, file } = 
+      const { link, linkTitle, title, file } =
         await oldFeaturedProductValidationSchema.validate(
-            {...featuredProduct}, 
-            { abortEarly: false });
+          { ...featuredProduct },
+          { abortEarly: false }
+        );
 
       const data: FeaturedProductForUpdate = {
-          link,
-          linkTitle,
-          title
-      }  
+        link,
+        linkTitle,
+        title,
+      };
 
-      console.log("bannerFile====>", file)
-      console.log("bannerOld", initialValue.banner)   
-
-      const source = initialValue.banner
-      const splittedData = source.split("/")
-      console.log("Data BannrtOld",splittedData)
-      const lastItem = splittedData[splittedData.length -1];
-      const publicIdOld = lastItem.split(".")[0]; 
+      const source = initialValue.banner;
+      const splittedData = source.split("/");
+      const lastItem = splittedData[splittedData.length - 1];
+      const publicIdOld = lastItem.split(".")[0];
       await removeImageFromCloud(publicIdOld);
 
       if (featuredProduct.file != undefined) {
-
-        const banner = await uploadImage(featuredProduct.file)
-        data.banner = banner
-    } 
-    await updateFeaturedProduct(initialValue.id, data);  
-    router.refresh();
-    router.push('/products/featured/add');
-
+        const banner = await uploadImage(featuredProduct.file);
+        data.banner = banner;
+      }
+      await updateFeaturedProduct(initialValue.id, data);
+      router.refresh();
+      router.push("/products/featured/add");
     } catch (error) {
-        if(error instanceof Yup.ValidationError) {
-            error.inner.map((err) => {
-                toast.error(err.message)                
-            })
-        }
+      if (error instanceof Yup.ValidationError) {
+        error.inner.map((err) => {
+          toast.error(err.message);
+        });
+      }
     }
   };
 
@@ -220,7 +215,9 @@ export default function FeaturedProductForm({ initialValue }: Props) {
         />
       </div>
       <div className="text-right">
-        <Button disabled={isPending} type="submit">{isForUpdate ? "Update" : "Submit"}</Button>
+        <Button disabled={isPending} type="submit">
+          {isForUpdate ? "Update" : "Submit"}
+        </Button>
       </div>
     </form>
   );

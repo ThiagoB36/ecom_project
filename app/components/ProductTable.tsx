@@ -18,7 +18,6 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { fetchProducts } from "../(admin)/products/action";
 
-
 export interface Product {
   id: string;
   title: string;
@@ -51,7 +50,7 @@ const TABLE_HEAD = [
   "Edit",
 ];
 
-interface Props { 
+interface Props {
   currentPageNo: number;
   hasMore?: boolean;
   showPageNavigator?: boolean;
@@ -59,7 +58,7 @@ interface Props {
 
 interface Prods {
   category: string;
-  price: any,
+  price: any;
   quantity: number;
   thumbnails: {
     id: string;
@@ -74,7 +73,7 @@ let hasMore: boolean;
 
 export default function ProductTable(props: Props) {
   const router = useRouter();
-  const {currentPageNo, showPageNavigator = true} = props;
+  const { currentPageNo, showPageNavigator = true } = props;
 
   const [sttProds, setProds] = useState<Prods[]>([]);
   const [sttProdsFirstTime, setProdsFirstTime] = useState<boolean>(true);
@@ -85,18 +84,20 @@ export default function ProductTable(props: Props) {
     const session = useSession();
     const userId = session.data?.user.id;
 
-    if (isNaN(+currentPageNo)) return redirect("/404"); 
+    if (isNaN(+currentPageNo)) return redirect("/404");
 
-    const allProds = await fetchProducts(userId, +currentPageNo, productsPerPage);
-    console.log({allProds})
+    const allProds = await fetchProducts(
+      userId,
+      +currentPageNo,
+      productsPerPage
+    );
 
+    if (allProds.length < productsPerPage) {
+      hasMore = false;
+    } else hasMore = true;
 
-    if(allProds.length < productsPerPage) {
-      hasMore = false; 
-    } else hasMore = true
-
-    const prod1id = allProds[0]?.id
-    const prod2id = sttProds[0]?.id
+    const prod1id = allProds[0]?.id;
+    const prod2id = sttProds[0]?.id;
 
     if (prod1id != prod2id) {
       setProds(allProds);
